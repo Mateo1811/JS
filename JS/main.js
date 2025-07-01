@@ -5,50 +5,78 @@ const productos = [
 ];
 let carrito = [];
 
-// Función 1: pedirProducto - entrada de datos
-function pedirProducto(productos) {
+function mostrarProductos(productos) {
     let mensaje = "Productos disponibles:\n";
-    for (let i = 0; i < productos.length; i++) {
-        mensaje += productos[i].id + ". " + productos[i].nombre + " - $" + productos[i].precio + "\n";
+    for (const producto of productos) {
+        mensaje += `${producto.id}. ${producto.nombre} - $${producto.precio}\n`;
     }
-    mensaje += "Ingresa el número del producto que quieres comprar:";
-    let opcion = parseInt(prompt(mensaje));
-    return opcion;
+    alert(mensaje);
 }
 
-// Función 2: agregarAlCarrito - procesamiento de datos
-function agregarAlCarrito(opcion, productos) {
-    // Solo 1 condicional para validar producto existente
-    if (opcion >= 1 && opcion <= productos.length) {
-        let productoElegido = productos[opcion - 1];
-        carrito.push(productoElegido);
-        console.log(productoElegido.nombre + " agregado al carrito.");
+
+function agregarAlCarrito(productos) {
+    let opcion = parseInt(prompt("Ingresá el número del producto que querés agregar al carrito:"));
+    const producto = productos.find(p => p.id === opcion);
+    
+    if (producto) {
+        carrito.push(producto);
+        alert(`${producto.nombre} agregado al carrito.`);
     } else {
-        alert("Producto no válido. Por favor intenta de nuevo.");
+        alert("Opción no válida.");
     }
 }
 
 // Función 3: mostrarResumen - mostrar resultados de salida
 function mostrarResumen(carrito) {
+    if (carrito.length === 0) {
+        alert("No agregaste ningún producto al carrito. ¡Hasta la próxima!");
+        return;
+    }
+
     let total = 0;
     let resumen = "Resumen de tu compra:\n";
-    for (let i = 0; i < carrito.length; i++) {
-        resumen += "- " + carrito[i].nombre + " $" + carrito[i].precio + "\n";
-        total += carrito[i].precio;
+    
+    for (const producto of carrito) {
+        resumen += `- ${producto.nombre} $${producto.precio}\n`;
+        total += producto.precio;
     }
-    resumen += "Total a pagar: $" + total;
+
+    resumen += `Total a pagar: $${total}`;
     alert(resumen);
-    console.log("Compra finalizada. Total: $" + total);
 }
 
-// Lógica principal
-alert("Bienvenido al simulador de carrito de compras.");
-let continuar = true;
+function iniciarSimulador() {
+    alert("Bienvenido al simulador de carrito de compras.");
+    let salir = false;
 
-while (continuar) {
-    let opcion = pedirProducto(productos);
-    agregarAlCarrito(opcion, productos);
-    continuar = confirm("¿Querés agregar otro producto?");
+    while (!salir) {
+        let opcion = prompt(
+            "¿Qué querés hacer?\n" +
+            "1. Ver productos\n" +
+            "2. Agregar producto al carrito\n" +
+            "3. Finalizar compra\n" +
+            "4. Salir"
+        );
+
+        switch (opcion) {
+            case "1":
+                mostrarProductos(productos);
+                break;
+            case "2":
+                agregarAlCarrito(productos);
+                break;
+            case "3":
+                mostrarResumen(carrito);
+                salir = true;
+                break;
+            case "4":
+                alert("Gracias por visitar nuestra tienda.");
+                salir = true;
+                break;
+            default:
+                alert("Opción no válida.");
+        }
+    }
 }
 
-mostrarResumen(carrito);
+iniciarSimulador();
