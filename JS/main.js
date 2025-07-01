@@ -1,82 +1,72 @@
-const productos = [
-    { id: 1, nombre: "Camiseta", precio: 2000 },
+document.addEventListener("DOMContentLoaded", () => {
+  const productos = [
+    { id: 1, nombre: "Camiseta", precio: 1500 },
     { id: 2, nombre: "Pantalón", precio: 2500 },
     { id: 3, nombre: "Zapatos", precio: 3500 },
-];
-let carrito = [];
+    { id: 4, nombre: "Shorts", precio: 1800 },
+    { id: 5, nombre: "Campera", precio: 4500 },
+    { id: 6, nombre: "Buzo", precio: 3000 },
+    { id: 7, nombre: "Gorra", precio: 1200 }
+  ];
 
-function mostrarProductos(productos) {
-    let mensaje = "Productos disponibles:\n";
-    for (const producto of productos) {
-        mensaje += `${producto.id}. ${producto.nombre} - $${producto.precio}\n`;
-    }
-    alert(mensaje);
-}
+  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
+  const productosContainer = document.getElementById("productos-container");
+  const carritoLista = document.getElementById("carrito-lista");
+  const carritoTotal = document.getElementById("carrito-total");
+  const finalizarBtn = document.getElementById("finalizar-btn");
 
-function agregarAlCarrito(productos) {
-    let opcion = parseInt(prompt("Ingresá el número del producto que querés agregar al carrito:"));
-    const producto = productos.find(p => p.id === opcion);
-    
+  function mostrarProductos() {
+    productosContainer.innerHTML = "";
+    productos.forEach(producto => {
+      const div = document.createElement("div");
+      div.className = "producto";
+      div.innerHTML = `
+        <h3>${producto.nombre}</h3>
+        <p>Precio: $${producto.precio}</p>
+        <button onclick="agregarAlCarrito(${producto.id})">Agregar</button>
+      `;
+      productosContainer.appendChild(div);
+    });
+  }
+
+  window.agregarAlCarrito = function(id) {
+    const producto = productos.find(p => p.id === id);
     if (producto) {
-        carrito.push(producto);
-        alert(`${producto.nombre} agregado al carrito.`);
-    } else {
-        alert("Opción no válida.");
+      const item = carrito.find(i => i.producto.id === id);
+      if (item) {
+        item.cantidad++;
+      } else {
+        carrito.push({ producto: producto, cantidad: 1 });
+      }
+      localStorage.setItem("carrito", JSON.stringify(carrito));
+      actualizarCarrito();
     }
-}
+  };
 
-// Función 3: mostrarResumen - mostrar resultados de salida
-function mostrarResumen(carrito) {
-    if (carrito.length === 0) {
-        alert("No agregaste ningún producto al carrito. ¡Hasta la próxima!");
-        return;
-    }
-
+  function actualizarCarrito() {
+    carritoLista.innerHTML = "";
     let total = 0;
-    let resumen = "Resumen de tu compra:\n";
-    
-    for (const producto of carrito) {
-        resumen += `- ${producto.nombre} $${producto.precio}\n`;
-        total += producto.precio;
+    carrito.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.producto.nombre} x${item.cantidad} - $${item.producto.precio * item.cantidad}`;
+      carritoLista.appendChild(li);
+      total += item.producto.precio * item.cantidad;
+    });
+    carritoTotal.textContent = `Total a pagar: $${total}`;
+  }
+
+  finalizarBtn.addEventListener("click", () => {
+    if (carrito.length === 0) {
+      carritoTotal.textContent = "No agregaste productos al carrito.";
+      return;
     }
+    carritoTotal.textContent += "\n¡Gracias por tu compra!";
+    localStorage.removeItem("carrito");
+    carrito = [];
+    actualizarCarrito();
+  });
 
-    resumen += `Total a pagar: $${total}`;
-    alert(resumen);
-}
-
-function iniciarSimulador() {
-    alert("Bienvenido al simulador de carrito de compras.");
-    let salir = false;
-
-    while (!salir) {
-        let opcion = prompt(
-            "¿Qué querés hacer?\n" +
-            "1. Ver productos\n" +
-            "2. Agregar producto al carrito\n" +
-            "3. Finalizar compra\n" +
-            "4. Salir"
-        );
-
-        switch (opcion) {
-            case "1":
-                mostrarProductos(productos);
-                break;
-            case "2":
-                agregarAlCarrito(productos);
-                break;
-            case "3":
-                mostrarResumen(carrito);
-                salir = true;
-                break;
-            case "4":
-                alert("Gracias por visitar nuestra tienda.");
-                salir = true;
-                break;
-            default:
-                alert("Opción no válida.");
-        }
-    }
-}
-
-iniciarSimulador();
+  mostrarProductos();
+  actualizarCarrito();
+});
